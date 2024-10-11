@@ -4,9 +4,7 @@
   "description": "modify of https://github.com/tapio/meld-server",
   "license": "MIT",
   "author": "Susumu Fujii <usually known as Sujii>",
-  "bin": {
-    "meld-server": "./meld-server.mjs"
-  },
+  "bin": "./meld-server.mjs",
   "repository": {
     "type": "git",
     "url": "https://github.com/sujii/meld-server.git"
@@ -23,6 +21,7 @@
     "test": "mocha test --exit && npm run lint"
   },
   "dependencies": {
+    "@types/node": "^22.7.5",
     "chokidar": "^3.5.3",
     "colors": "1.4.0",
     "connect": "^3.7.0",
@@ -72,5 +71,6 @@
     "date": "2023-12-14"
   },
   "preferGlobal": true,
-  "type:": "module"
+  "type:": "module",
+  "packageManager": "yarn@4.5.0"
 }
