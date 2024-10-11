@@ -2,7 +2,7 @@ Meld Server
 ===========
 
 ## about
-- modify of [@tapio/meld-server](https://github.com/tapio/meld-server)
+Simple TS Server. Inspired by @tapio/live-server, @vercel/serve.
 - [x] refact: up to ES6+
 - [ ] modify: re-wright to type-script
 - [ ] feature: etc...Serveraboutmodifyof/meld-serverhttpsServeraboutmodifyof/meld-serverhttps
