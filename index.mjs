@@ -50,30 +50,30 @@ const staticServer = (root) => {
 
   return function (req, res, next) {
     if (req.method !== "GET" && req.method !== "HEAD") return next();
-    var reqpath = isFile ? "" : url.parse(req.url).pathname;
-    var hasNoOrigin = !req.headers.origin;
-    var injectCandidates = [
+    const reqpath = isFile ? "" : url.parse(req.url).pathname;
+    const hasNoOrigin = !req.headers.origin;
+    const injectCandidates = [
       new RegExp("</body>", "i"),
       new RegExp("</svg>"),
       new RegExp("</head>", "i"),
     ];
-    var injectTag = null;
+    const injectTag = null;
 
     function directory() {
-      var pathname = url.parse(req.originalUrl).pathname;
+      const pathname = url.parse(req.originalUrl).pathname;
       res.statusCode = 301;
       res.setHeader("Location", pathname + "/");
       res.end("Redirecting to " + escape(pathname) + "/");
     }
 
     function file(filepath /*, stat*/) {
-      var x = path.extname(filepath).toLocaleLowerCase(),
+      let x = path.extname(filepath).toLocaleLowerCase(),
         match,
         possibleExtensions = ["", ".html", ".htm", ".xhtml", ".php", ".svg"];
       if (hasNoOrigin && possibleExtensions.indexOf(x) > -1) {
         // TODO: Sync file read here is not nice, but we need to determine if the html should be injected or not
-        var contents = fs.readFileSync(filepath, "utf8");
-        for (var i = 0; i < injectCandidates.length; ++i) {
+        const contents = fs.readFileSync(filepath, "utf8");
+        for (const i = 0; i < injectCandidates.length; ++i) {
           match = injectCandidates[i].exec(contents);
           if (match) {
             injectTag = match[0];
@@ -100,9 +100,9 @@ const staticServer = (root) => {
     function inject(stream) {
       if (injectTag) {
         // We need to modify the length given to browser
-        var len = INJECTED_CODE.length + res.getHeader("Content-Length");
+        const len = INJECTED_CODE.length + res.getHeader("Content-Length");
         res.setHeader("Content-Length", len);
-        var originalPipe = stream.pipe;
+        const originalPipe = stream.pipe;
         stream.pipe = function (resp) {
           originalPipe
             .call(
@@ -141,30 +141,30 @@ MeldServer.start = (options = {}) => {
   // ... (MeldServer.start function body)
 
   options = options || {};
-  var host = options.host || "0.0.0.0";
-  // var port = options.port !== undefined ? options.port : 8080; // 0 means random
-  var root = options.root || process.cwd();
-  var mount = options.mount || [];
-  var watchPaths = options.watch || [root];
+  const host = options.host || "0.0.0.0";
+  // const port = options.port !== undefined ? options.port : 8080; // 0 means random
+  const root = options.root || process.cwd();
+  const mount = options.mount || [];
+  const watchPaths = options.watch || [root];
   MeldServer.logLevel = options.logLevel === undefined ? 2 : options.logLevel;
-  var openPath =
+  const openPath =
     options.open === undefined || options.open === true
       ? ""
       : options.open === null || options.open === false
         ? null
         : options.open;
   if (options.noBrowser) openPath = null; // Backwards compatibility with 0.7.0
-  var file = options.file;
-  var staticServerHandler = staticServer(root);
-  // var wait = options.wait === undefined ? 100 : options.wait;
-  var browser = options.browser || null;
-  var htpasswd = options.htpasswd || null;
-  var cors = options.cors || false;
-  var https = options.https || null;
-  var proxy = options.proxy || [];
-  var middleware = options.middleware || [];
-  // var noCssInject = options.noCssInject;
-  var httpsModule = options.httpsModule;
+  const file = options.file;
+  const staticServerHandler = staticServer(root);
+  // const wait = options.wait === undefined ? 100 : options.wait;
+  const browser = options.browser || null;
+  const htpasswd = options.htpasswd || null;
+  const cors = options.cors || false;
+  const https = options.https || null;
+  const proxy = options.proxy || [];
+  const middleware = options.middleware || [];
+  // const noCssInject = options.noCssInject;
+  const httpsModule = options.httpsModule;
 
   if (httpsModule) {
     try {
@@ -182,7 +182,7 @@ MeldServer.start = (options = {}) => {
   }
 
   // Setup a web server
-  var app = connect();
+  const app = connect();
 
   // Add logger. Level 2 logs only errors
   if (MeldServer.logLevel === 2) {
@@ -203,7 +203,7 @@ MeldServer.start = (options = {}) => {
   // Add middleware
   middleware.map(function (mw) {
     if (typeof mw === "string") {
-      var ext = path.extname(mw).toLocaleLowerCase();
+      const ext = path.extname(mw).toLocaleLowerCase();
       if (ext !== ".js") {
         mw = require(path.join(__dirname, "middleware", mw + ".js"));
       } else {
@@ -215,8 +215,8 @@ MeldServer.start = (options = {}) => {
 
   // Use http-auth if configured
   if (htpasswd !== null) {
-    var auth = require("http-auth");
-    var basic = auth.basic({
+    const auth = require("http-auth");
+    const basic = auth.basic({
       realm: "Please authorize",
       file: htpasswd,
     });
@@ -231,7 +231,7 @@ MeldServer.start = (options = {}) => {
     );
   }
   mount.forEach(function (mountRule) {
-    var mountPath = path.resolve(process.cwd(), mountRule[1]);
+    const mountPath = path.resolve(process.cwd(), mountRule[1]);
     if (!options.watch)
       // Auto add mount paths to wathing but only if exclusive path option is not given
       watchPaths.push(mountPath);
@@ -240,7 +240,7 @@ MeldServer.start = (options = {}) => {
     // console.log('Mapping %s to "%s"', mountRule[0], mountPath);
   });
   proxy.forEach(function (proxyRule) {
-    var proxyOpts = url.parse(proxyRule[1]);
+    const proxyOpts = url.parse(proxyRule[1]);
     proxyOpts.via = true;
     proxyOpts.preserveHost = true;
     app.use(proxyRule[0], require("proxy-middleware")(proxyOpts));
@@ -252,9 +252,9 @@ MeldServer.start = (options = {}) => {
     .use(entryPoint(staticServerHandler, file))
     .use(serveIndex(root, { icons: true }));
 
-  var server, protocol;
+  let server, protocol;
   if (https !== null) {
-    var httpsConfig = https;
+    const httpsConfig = https;
     if (typeof https === "string") {
       httpsConfig = require(path.resolve(process.cwd(), https));
     }
@@ -268,7 +268,7 @@ MeldServer.start = (options = {}) => {
   // Handle server startup errors
   server.addListener("error", function (e) {
     if (e.code === "EADDRINUSE") {
-      // var serveURL = protocol + "://" + host + ":" + port;
+      // const serveURL = protocol + "://" + host + ":" + port;
       // console.log(
       //   "%s is already in use. Trying another port.".yellow,
       //   serveURL,
@@ -286,17 +286,17 @@ MeldServer.start = (options = {}) => {
   server.addListener("listening", function (/*e*/) {
     MeldServer.server = server;
 
-    var address = server.address();
-    var serveHost =
+    const address = server.address();
+    const serveHost =
       address.address === "0.0.0.0" ? "127.0.0.1" : address.address;
-    var openHost = host === "0.0.0.0" ? "127.0.0.1" : host;
+    const openHost = host === "0.0.0.0" ? "127.0.0.1" : host;
 
-    var serveURL = protocol + "://" + serveHost + ":" + address.port;
-    var openURL = protocol + "://" + openHost + ":" + address.port;
+    const serveURL = protocol + "://" + serveHost + ":" + address.port;
+    const openURL = protocol + "://" + openHost + ":" + address.port;
 
-    var serveURLs = [serveURL];
+    const serveURLs = [serveURL];
     if (MeldServer.logLevel > 2 && address.address === "0.0.0.0") {
-      var ifaces = os.networkInterfaces();
+      const ifaces = os.networkInterfaces();
       serveURLs = Object.keys(ifaces)
         .map(function (iface) {
           return ifaces[iface];
